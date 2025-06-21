@@ -11,10 +11,11 @@ const bookSchema =new Schema<IBook> ({
     description :{ type: String},
     copies : {type: Number, required: true, min: 0},
     available: {type: Boolean, required: true, default: true},
-    createdAt: { type: Date, default: Date.now },
-    updatedAt: { type: Date, default: Date.now }
+  
 
 },{
+    
+  timestamps: true ,
     versionKey: false,
 })
 

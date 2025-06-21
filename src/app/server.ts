@@ -1,6 +1,7 @@
 import { Server } from "http";
-import app from "./app";
+
 import mongoose from "mongoose";
+import app from "./app";
 
 
 let server : Server;

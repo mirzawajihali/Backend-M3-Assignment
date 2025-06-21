@@ -1,6 +1,6 @@
 import express, { Request, Response, Application    } from 'express';   
 import { model, Schema } from 'mongoose';
-import { booksRouter } from './app/controllers/books.controller';
+import { booksRouter } from './controllers/books.controller';
 
 
 const app : Application = express();
