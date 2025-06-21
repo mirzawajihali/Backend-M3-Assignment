@@ -6,7 +6,8 @@ export const booksRouter = express.Router();
 
 
 booksRouter.post("/" , async(req : Request, res: Response) =>{
-    const body = req.body;
+   try{
+     const body = req.body;
 
     const data = await Book.create(body);
 
@@ -15,57 +16,90 @@ booksRouter.post("/" , async(req : Request, res: Response) =>{
         message: "Book created successfully",
         data
     });
+   }
+   catch (error: any) {
+        res.status(error.name === 'ValidationError' ? 400 : 500).json({
+            success: false,
+            message: error.name === 'ValidationError' ? 'Validation failed' : 'Failed to create book',
+            error
+        });
+    }
 })
 
 
-booksRouter.get("/" , async(req : Request, res: Response) =>{
+booksRouter.get("/", async (req: Request, res: Response) => {
+    const { 
+        filter, 
+        sortBy = 'createdAt', 
+        sort = 'asc', 
+        limit = '10' 
+    } = req.query;
 
-    //   const { 
-    //         filter, 
-    //         sortBy = 'createdAt', 
-    //         sort = 'asc', 
-    //         limit = '10' 
-    //     } = req.query;
+    try {
+        // aggregation pipeline
+        const pipeline: any[] = [];
+
+        if (filter) {
+            pipeline.push({
+                $match: {
+                    genre: filter
+                }
+            });
+        }
+
+       
+        const sortDirection = sort === 'desc' ? -1 : 1;
+        pipeline.push({
+            $sort: {
+                [sortBy as string]: sortDirection
+            }
+        });
+
+       
+        const limitValue = parseInt(limit as string) || 10;
+        pipeline.push({
+            $limit: limitValue
+        });
+
         
-    //     // Build query
-    //     const query = Book.find();
-        
-    //     // Apply filter dynamically if provided
-    //     if (filter) {
-    //         query.where('genre', filter);
-    //     }
-        
-    //     // Apply dynamic sorting - can handle any valid field
-    //     const sortDirection = sort === 'desc' ? -1 : 1;
-    //     query.sort({ [sortBy as string]: sortDirection });
-        
-    //     // Apply pagination limit
-    //     const limitValue = parseInt(limit as string) || 10;
-    //     query.limit(limitValue);
-        
-    //     // Execute query
-    //     const data = await query.exec();
-    const data = await Book.find();
-        
+        const data = await Book.aggregate(pipeline);
+
         res.status(200).json({
-            success : true,
-            message: "Books got successfully",
+            success: true,
+            message: "Books retrieved successfully",
             data
         });
-})
+    } catch (error : any) {
+        res.status(500).json({
+            success: false,
+            message: "Error retrieving books",
+            error: error.message
+        });
+    }
+});
 
 
-booksRouter.get("/:id", async(req : Request, res: Response) => {
+booksRouter.get("/:bookId", async(req : Request, res: Response) => {
 
-
-    const id = req.params.id;
+try{
+    
+    const id = req.params.bookId;
     const data = await Book.findById(id);
+   
 
     res.status(200).json({
         success : true,
         message: "Book got successfully",
         data
     });
+}
+catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Failed to retrieve book",
+            error
+        });
+    }
 })
 
 
@@ -84,11 +118,20 @@ booksRouter.put('/:bookId', async(req : Request, res: Response) => {
 
 
 booksRouter.delete('/:bookId', async(req : Request, res: Response) => {
-    const id = req.params.bookId;
+    try{
+        const id = req.params.bookId;
     const data = await Book.findByIdAndDelete(id);
     res.status(200).json({
         success : true,
         message: "Book deleted successfully",
         data
     });
+    }
+    catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Failed to delete book",
+            error
+        });
+    }
 })
