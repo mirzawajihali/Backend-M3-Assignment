@@ -1,7 +1,7 @@
 import express, { Request, Response, Application    } from 'express';   
 import { model, Schema } from 'mongoose';
-import { booksRouter } from './controllers/books.controller';
-import { borrowsRouter } from './controllers/borrows.controller';
+import { booksRouter } from './app/controllers/books.controller';
+import { borrowsRouter } from './app/controllers/borrows.controller';
 
 
 const app : Application = express();

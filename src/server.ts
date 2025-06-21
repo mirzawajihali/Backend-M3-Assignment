@@ -1,15 +1,17 @@
 import { Server } from "http";
-
 import mongoose from "mongoose";
 import app from "./app";
+import dotenv from 'dotenv';
 
+// Load environment variables from .env file
+dotenv.config();
 
 let server : Server;
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 
 async function main(){
 try{
-     await mongoose.connect('mongodb+srv://express:wajih@cluster0.sk4ge.mongodb.net/Library?retryWrites=true&w=majority&appName=Cluster0');
+     await mongoose.connect(process.env.DATABASE_URL as string);
      
         server = app.listen(PORT, () => {
             console.log(`Server is running on port ${PORT}`);
