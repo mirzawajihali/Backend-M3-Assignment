@@ -1,12 +1,13 @@
 import express from 'express';
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { Borrow } from '../models/borrows.model';
+import NotFoundError from '../utils/NotFoundError';
 
 
 export const borrowsRouter = express.Router();
 
 
-borrowsRouter.post('/', async (req: Request, res: Response) => {
+borrowsRouter.post('/', async (req: Request, res: Response, next: NextFunction) => {
     try {
         const borrowData = req.body;
         
@@ -18,17 +19,13 @@ borrowsRouter.post('/', async (req: Request, res: Response) => {
             message: "Book borrowed successfully",
             data
         });
-    } catch (error: any) {
-        res.status(400).json({
-            success: false,
-            message: error.message || "Failed to borrow book",
-            error
-        });
+    } catch (error) {
+        next(error);
     }
 });
 
 
-borrowsRouter.get("/", async (req: Request, res: Response) => {
+borrowsRouter.get("/", async (req: Request, res: Response, next: NextFunction) => {
     try {
         const data = await Borrow.aggregate([
             {
@@ -59,23 +56,14 @@ borrowsRouter.get("/", async (req: Request, res: Response) => {
                     },
                     totalQuantity: 1
                 }
-            }
-
-        ]);
+            }        ]);
         res.status(200).json({
             success: true,
             message: "Borrowed books summary retrieved successfully",
             data
         });
-
-        
     }
-    catch (error: any) {
-        res.status(500).json({
-            success: false,
-            message: "Failed to retrieve borrowed books summary",
-            error: error.message || error
-        });
-
+    catch (error) {
+        next(error);
     }
 });

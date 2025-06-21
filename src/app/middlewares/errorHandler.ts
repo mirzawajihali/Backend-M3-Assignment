@@ -6,10 +6,9 @@ export const errorHandler = (
   res: Response, 
   next: NextFunction
 ) => {
-  // Default status code
-  let statusCode = 500;
   
-  // For validation errors
+  let statusCode = 500;
+
   if (err.name === 'ValidationError') {
     statusCode = 400;
     return res.status(statusCode).json({
@@ -19,12 +18,12 @@ export const errorHandler = (
     });
   }
   
-  // For 404 errors (Not Found)
+  
   if (err.name === 'NotFoundError' || err.message.includes('not found')) {
     statusCode = 404;
   }
   
-  // For other errors
+ 
   return res.status(statusCode).json({
     message: err.message || "Something went wrong",
     success: false,
