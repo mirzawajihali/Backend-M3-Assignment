@@ -1,5 +1,5 @@
 import express, { Request, Response, Application, NextFunction } from 'express';   
-import { model, Schema } from 'mongoose';
+
 import { booksRouter } from './app/controllers/books.controller';
 import { borrowsRouter } from './app/controllers/borrows.controller';
 import { errorHandler } from './app/middlewares/errorHandler';

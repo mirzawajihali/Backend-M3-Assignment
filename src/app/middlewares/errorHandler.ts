@@ -10,13 +10,16 @@ export const errorHandler = (
   let statusCode = 500;
 
   if (err.name === 'ValidationError') {
-    statusCode = 400;
-    return res.status(statusCode).json({
-      message: "Validation failed",
-      success: false,
-      error: err
-    });
-  }
+  statusCode = 400;
+  return res.status(statusCode).json({
+    message: "Validation failed",
+    success: false,
+    error: {
+      name: err.name,
+      errors: err.errors
+    }
+  });
+}
   
   
   if (err.name === 'NotFoundError' || err.message.includes('not found')) {
