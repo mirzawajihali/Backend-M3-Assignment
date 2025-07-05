@@ -15,8 +15,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.booksRouter = void 0;
 const express_1 = __importDefault(require("express"));
 const books_model_1 = require("../models/books.model");
+const NotFoundError_1 = __importDefault(require("../utils/NotFoundError"));
 exports.booksRouter = express_1.default.Router();
-exports.booksRouter.post("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+exports.booksRouter.post("/", (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const body = req.body;
         const data = yield books_model_1.Book.create(body);
@@ -27,14 +28,10 @@ exports.booksRouter.post("/", (req, res) => __awaiter(void 0, void 0, void 0, fu
         });
     }
     catch (error) {
-        res.status(error.name === 'ValidationError' ? 400 : 500).json({
-            success: false,
-            message: error.name === 'ValidationError' ? 'Validation failed' : 'Failed to create book',
-            error
-        });
+        next(error); // Passig the error to the error handling middleware
     }
 }));
-exports.booksRouter.get("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+exports.booksRouter.get("/", (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const { filter, sortBy = 'createdAt', sort = 'asc', limit = '10' } = req.query;
     try {
         // aggregation pipeline
@@ -64,47 +61,54 @@ exports.booksRouter.get("/", (req, res) => __awaiter(void 0, void 0, void 0, fun
         });
     }
     catch (error) {
-        res.status(500).json({
-            success: false,
-            message: "Error retrieving books",
-            error: error.message
-        });
+        next(error);
     }
 }));
-exports.booksRouter.get("/:bookId", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+exports.booksRouter.get("/:bookId", (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const id = req.params.bookId;
         const data = yield books_model_1.Book.findById(id);
+        if (!data) {
+            throw new NotFoundError_1.default('Book', id);
+        }
         res.status(200).json({
             success: true,
-            message: "Book got successfully",
+            message: "Book retrieved successfully",
             data
         });
     }
     catch (error) {
-        res.status(500).json({
-            success: false,
-            message: "Failed to retrieve book",
-            error
-        });
+        next(error);
     }
 }));
-exports.booksRouter.put('/:bookId', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const id = req.params.bookId;
-    const updatableData = req.body;
-    const data = yield books_model_1.Book.findByIdAndUpdate(id, updatableData, {
-        new: true
-    });
-    res.status(200).json({
-        success: true,
-        message: "Book updated successfully",
-        data
-    });
+exports.booksRouter.put('/:bookId', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const id = req.params.bookId;
+        const updatableData = req.body;
+        const data = yield books_model_1.Book.findByIdAndUpdate(id, updatableData, {
+            new: true,
+            runValidators: true
+        });
+        if (!data) {
+            throw new NotFoundError_1.default('Book', id);
+        }
+        res.status(200).json({
+            success: true,
+            message: "Book updated successfully",
+            data
+        });
+    }
+    catch (error) {
+        next(error);
+    }
 }));
-exports.booksRouter.delete('/:bookId', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+exports.booksRouter.delete('/:bookId', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const id = req.params.bookId;
         const data = yield books_model_1.Book.findByIdAndDelete(id);
+        if (!data) {
+            throw new NotFoundError_1.default('Book', id);
+        }
         res.status(200).json({
             success: true,
             message: "Book deleted successfully",
@@ -112,10 +116,6 @@ exports.booksRouter.delete('/:bookId', (req, res) => __awaiter(void 0, void 0, v
         });
     }
     catch (error) {
-        res.status(500).json({
-            success: false,
-            message: "Failed to delete book",
-            error
-        });
+        next(error);
     }
 }));

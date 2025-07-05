@@ -16,7 +16,7 @@ exports.borrowsRouter = void 0;
 const express_1 = __importDefault(require("express"));
 const borrows_model_1 = require("../models/borrows.model");
 exports.borrowsRouter = express_1.default.Router();
-exports.borrowsRouter.post('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+exports.borrowsRouter.post('/', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const borrowData = req.body;
         // Used the static method to handle both operations
@@ -28,14 +28,10 @@ exports.borrowsRouter.post('/', (req, res) => __awaiter(void 0, void 0, void 0, 
         });
     }
     catch (error) {
-        res.status(400).json({
-            success: false,
-            message: error.message || "Failed to borrow book",
-            error
-        });
+        next(error);
     }
 }));
-exports.borrowsRouter.get("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+exports.borrowsRouter.get("/", (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const data = yield borrows_model_1.Borrow.aggregate([
             {
@@ -73,10 +69,6 @@ exports.borrowsRouter.get("/", (req, res) => __awaiter(void 0, void 0, void 0, f
         });
     }
     catch (error) {
-        res.status(500).json({
-            success: false,
-            message: "Failed to retrieve borrowed books summary",
-            error: error.message || error
-        });
+        next(error);
     }
 }));

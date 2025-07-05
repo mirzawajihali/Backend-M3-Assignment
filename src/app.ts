@@ -1,11 +1,13 @@
-import express, { Request, Response, Application, NextFunction } from 'express';   
 
+import express, { Request, Response, Application, NextFunction } from 'express';   
+import cors from 'cors';
 import { booksRouter } from './app/controllers/books.controller';
 import { borrowsRouter } from './app/controllers/borrows.controller';
 import { errorHandler } from './app/middlewares/errorHandler';
 
 
 const app : Application = express();
+app.use(cors({origin: 'http://localhost:5173'}))
 
 app.use(express.json());
 
